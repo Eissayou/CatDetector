@@ -1,95 +1,91 @@
-import Image from "next/image";
+'use client'
+
+import NextImage from "next/image"; // Renamed import
 import styles from "./page.module.css";
+import { ProgressBar, ProgressRoot } from "@/components/ui/progress"
+import React, { useState, useEffect } from 'react';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import * as tf from '@tensorflow/tfjs';
+import { Spinner } from "@chakra-ui/react"
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const [imgBase64, setImgBase64] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [finalInference, setFinalInference] = useState('')
+  const [model, setModel] = useState(null);
+
+  // Load the model on component mount
+  useEffect(() => {
+    async function loadModel() {
+      console.log("Model loading..");
+      const loadedModel = await mobilenet.load({ version: 2, alpha: 1 });
+      setModel(loadedModel);
+      console.log("Model loaded..");
+    }
+    loadModel();
+  }, []);
+
+  const classifyImage = async (image) => {
+    if (model) {
+      const img = new Image(); // Correctly uses the browser's Image object
+      img.src = image;
+      await img.decode();
+      const predictions = await model.classify(img);
+      const inferenceString = predictions.map(p => `${p.className}: ${p.probability.toFixed(2)}`).join(", ");
+      setFinalInference(inferenceString);
+    }
+  };
+
+  const handleImageChange = async (event) => {
+    setIsLoading(true);
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        setImgBase64(base64Image);
+        await classifyImage(base64Image);
+        setIsLoading(false);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.title}>Cat Breed Classifier</h1>
+
+      {model && (<input type="file" accept="image/*" onChange={handleImageChange} disabled={isLoading || !model} className={styles.input} />)}
+
+      {isLoading && (
+        <div className={styles.progressContainer}>
+          <Spinner size="xl" />
+          <p>Guessing your cat...</p>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      )}
+
+      {!model && (
+        <div className={styles.progressContainer}>
+          <Spinner size="xl" />
+          <p>The Model is currently loading...</p>
+        </div>
+      )}
+
+      {imgBase64 && !isLoading && (
+        <div className={styles.imageContainer}>
+          <img
+            src={imgBase64}
+            alt="UploadedImage"
+            className={styles.image}
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <p className={styles.predictions}>Predictions: {finalInference}</p>
+        </div>
+      )}
     </div>
-  );
+  )
 }
