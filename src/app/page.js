@@ -3,7 +3,7 @@
 import NextImage from "next/image"; // Renamed import
 import styles from "./page.module.css";
 import { ProgressBar, ProgressRoot } from "@/components/ui/progress"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
 import { Spinner } from "@chakra-ui/react"
@@ -55,6 +55,57 @@ export default function Home() {
       reader.readAsDataURL(file);
     }
   }
+
+  const handleMongoPost = async (userID, base64Image, imageGuess) => {
+    try {
+      const response = await fetch('/api/SendFileToMongo', { // Make an HTTP request to the API route
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userID, base64Image, imageGuess }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Success:', data); // Handle success
+      } else {
+        const errorData = await response.json();
+        console.error('Error:', errorData); // Handle error
+      }
+    } catch (error) {
+      console.error('Error:', error); // Handle error
+    }
+  };
+
+  // This code is to make it only send when BOTH the image and the inference have changed.
+  //---------------------------------------------------------------------------------
+  const changesRef = useRef({
+    imgBase64: false,
+    finalInference: false
+  });
+
+
+  useEffect(() => {
+    changesRef.current.imgBase64 = true;
+  }, [imgBase64]);
+
+  useEffect(() => {
+    changesRef.current.finalInference = true;
+  }, [finalInference]);
+
+  // Check if both have changed in a combined useEffect
+  useEffect(() => {
+    if (changesRef.current.imgBase64 && changesRef.current.finalInference) {
+      // Reset the ref values
+      changesRef.current.imgBase64 = false;
+      changesRef.current.finalInference = false;
+
+      // Call handleMongoPost only if both have changed
+      handleMongoPost("Jason", imgBase64, finalInference);
+    }
+  }, [imgBase64, finalInference]); // Still depend on both values
+  //---------------------------------------------------------------------------------
 
   return (
     <div className={styles.container}>
