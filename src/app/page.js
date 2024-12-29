@@ -6,18 +6,19 @@ import { ProgressBar, ProgressRoot } from "@/components/ui/progress"
 import React, { useState, useEffect, useRef } from 'react';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
-import { Spinner } from "@chakra-ui/react"
+import { Spinner, Button } from "@chakra-ui/react"
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
 
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const [imgBase64, setImgBase64] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [finalInference, setFinalInference] = useState('')
   const [model, setModel] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  // Load the model on component mount
+  // Load the model on component mount. THis will be the first thing that is done
   useEffect(() => {
     async function loadModel() {
       console.log("Model loading..");
@@ -28,6 +29,7 @@ export default function Home() {
     loadModel();
   }, []);
 
+  // Sends the img to the model and returns the inference
   const classifyImage = async (image) => {
     if (model) {
       const img = new Image(); // Correctly uses the browser's Image object
@@ -39,6 +41,7 @@ export default function Home() {
     }
   };
 
+  // Whenever an image changes, this is ran.
   const handleImageChange = async (event) => {
     setIsLoading(true);
     const file = event.target.files[0];
@@ -56,6 +59,7 @@ export default function Home() {
     }
   }
 
+  // Posting image to MongoDB
   const handleMongoPost = async (userID, base64Image, imageGuess) => {
     try {
       const response = await fetch('/api/SendFileToMongo', { // Make an HTTP request to the API route
@@ -107,6 +111,32 @@ export default function Home() {
   }, [imgBase64, finalInference]); // Still depend on both values
   //---------------------------------------------------------------------------------
 
+
+  const router = useRouter(); // Get the router object
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true)
+      const response = await fetch('/api/HandleLogout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Successful logout
+        router.push('/login');
+        router.refresh();
+        setLoggingOut(false)
+      } else {
+        console.error('Logout failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Cat Breed Classifier</h1>
@@ -135,6 +165,23 @@ export default function Home() {
             className={styles.image}
           />
           <p className={styles.predictions}>Predictions: {finalInference}</p>
+        </div>
+      )}
+      {!loggingOut && (<Button
+        onClick={handleLogout}
+        colorScheme="red"
+        variant="outline"
+        size="sm"
+        mt={4} // Add some top margin
+      >
+        Logout
+      </Button>
+      )
+      }
+      {loggingOut && (
+        <div className={styles.progressContainer}>
+          <Spinner size="xl" />
+          <p>You have logged out! Redirecting now...</p>
         </div>
       )}
     </div>

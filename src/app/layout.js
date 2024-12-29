@@ -32,12 +32,12 @@ export default function RootLayout({ children }) {
               <ul className={styles.navList}>
                 <li className={styles.navItem}>
                   <a href="/" className={styles.navLink}>
-                    Home
+                    Classify
                   </a>
                 </li>
                 <li className={styles.navItem}>
-                  <a href="/about" className={styles.navLink}>
-                    About
+                  <a href="/login" className={styles.navLink}>
+                    Register/Login
                   </a>
                 </li>
               </ul>
