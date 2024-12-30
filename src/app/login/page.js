@@ -32,6 +32,7 @@ export default function Login() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        
         setIsLoading(true);
         if (isLoggingInOrRegistering === "isLoggedIn") {
             setIsLoading(false);
@@ -42,6 +43,7 @@ export default function Login() {
 
         if (isLoggingInOrRegistering === "isLoggingIn" || isLoggingInOrRegistering === "isRegistering") {
             try {
+                
                 const response = await fetch('/api/SendLoginToMongo', {
                     method: 'POST',
                     headers: {
@@ -54,17 +56,19 @@ export default function Login() {
                     const data = await response.json();
                     console.log('Success:', data);
                     userLoggedIn();
-                    setIsLoading(false)
+                    setIsLoading(false);
                     router.push('/');
                     router.refresh()
                 } else {
                     const errorData = await response.json();
                     console.error('Error:', errorData);
                     setError(errorData.error);
+                    setIsLoading(false);
                 }
             } catch (error) {
                 console.error('Error:', error);
                 setError(errorData.error);
+                setIsLoading(false);
             }
         }
     }
@@ -109,7 +113,7 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <Button type="submit" colorScheme="blue" size="lg">
+                    <Button type="submit" colorScheme="blue" size="xl" isLoading={isLoading} loadingText="Submitting">
                         {isLoggingInOrRegistering === 'isLoggingIn' ? 'Login' : 'Register'}
                     </Button>
                 </>

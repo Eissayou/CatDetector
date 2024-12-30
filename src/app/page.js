@@ -18,7 +18,7 @@ export default function Home() {
   const [model, setModel] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Load the model on component mount. THis will be the first thing that is done
+  // Load the model on component mount. This will be the first thing that is done
   useEffect(() => {
     async function loadModel() {
       console.log("Model loading..");
@@ -36,6 +36,11 @@ export default function Home() {
       img.src = image;
       await img.decode();
       const predictions = await model.classify(img);
+      
+      if(!predictions){
+        return;
+      }
+
       const inferenceString = predictions.map(p => `${p.className}: ${p.probability.toFixed(2)}`).join(", ");
       setFinalInference(inferenceString);
     }
@@ -50,6 +55,11 @@ export default function Home() {
 
       reader.onloadend = async () => {
         const base64Image = reader.result;
+
+        if (!base64Image) { 
+          return; 
+        }
+
         setImgBase64(base64Image);
         await classifyImage(base64Image);
         setIsLoading(false);
@@ -60,14 +70,25 @@ export default function Home() {
   }
 
   // Posting image to MongoDB
-  const handleMongoPost = async (userID, base64Image, imageGuess) => {
+  const handleMongoPost = async (base64Image, imageGuess) => {
     try {
+      const tokenResponse = await fetch('/api/GetTokenFromClient');
+      const tokenData = await tokenResponse.json();
+
+      if (tokenData.error) {
+        console.error(tokenData.error);
+        return;
+      }
+
+      const token = tokenData.token;
+
+
       const response = await fetch('/api/SendFileToMongo', { // Make an HTTP request to the API route
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userID, base64Image, imageGuess }),
+        body: JSON.stringify({ token, base64Image, imageGuess }),
       });
 
       if (response.ok) {
@@ -98,17 +119,16 @@ export default function Home() {
     changesRef.current.finalInference = true;
   }, [finalInference]);
 
-  // Check if both have changed in a combined useEffect
+  // Check if image and finalInference have changed and also model is loaded everytime one of the three change.
   useEffect(() => {
-    if (changesRef.current.imgBase64 && changesRef.current.finalInference) {
+    if (changesRef.current.imgBase64 && changesRef.current.finalInference && model) {
       // Reset the ref values
       changesRef.current.imgBase64 = false;
       changesRef.current.finalInference = false;
 
-      // Call handleMongoPost only if both have changed
-      handleMongoPost("Jason", imgBase64, finalInference);
+      handleMongoPost(imgBase64, finalInference);
     }
-  }, [imgBase64, finalInference]); // Still depend on both values
+  }, [imgBase64, finalInference, model]);
   //---------------------------------------------------------------------------------
 
 

@@ -1,5 +1,6 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import { NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 
 const uri = process.env.MONGODB_URI; // Get from environment variable
 
@@ -35,7 +36,16 @@ export async function POST(req) {
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
 
-        const { userID, base64Image, imageGuess } = await req.json();
+        const { token, base64Image, imageGuess } = await req.json();
+
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+
+
+        // Verify the JWT and get the payload
+        const { payload } = await jwtVerify(token, secret);
+        const username = payload.username;
+
+
 
         // Basic validation
         if (!imageGuess || imageGuess.trim() === "") {
@@ -46,7 +56,7 @@ export async function POST(req) {
         }
 
         const doc = {
-            user: userID,
+            user: username,
             base64: base64Image,
             guess: imageGuess,
             timestamp: new Date(),
