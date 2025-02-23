@@ -17,32 +17,118 @@ export default function Home() {
   const [finalInference, setFinalInference] = useState('')
   const [model, setModel] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [error, setError] = useState(null); // Add error state
+
 
   // Load the model on component mount. This will be the first thing that is done
   useEffect(() => {
     async function loadModel() {
       console.log("Model loading..");
-      const loadedModel = await mobilenet.load({ version: 2, alpha: 1 });
-      setModel(loadedModel);
-      console.log("Model loaded..");
+      try {
+        const loadedModel = await tf.loadLayersModel('/tfjs_cat_model_output/content/tfjs_model_from_weights_output/model.json');
+        setModel(loadedModel);
+        console.log("Model loaded..");
+      } catch (err) {
+        console.error("Error loading model:", err);
+        setError("Failed to load model."); // Set error state
+      }
     }
     loadModel();
   }, []);
 
   // Sends the img to the model and returns the inference
-  const classifyImage = async (image) => {
-    if (model) {
-      const img = new Image(); // Correctly uses the browser's Image object
-      img.src = image;
-      await img.decode();
-      const predictions = await model.classify(img);
-      
-      if(!predictions){
-        return;
-      }
+    const classifyImage = async (image) => {
+    if (!model) {
+      console.error("Model not loaded yet.");
+      setError("Model not loaded yet."); // Set error for UI display
+      return;
+    }
 
-      const inferenceString = predictions.map(p => `${p.className}: ${p.probability.toFixed(2)}`).join(", ");
-      setFinalInference(inferenceString);
+    try {
+      const img = new Image();
+      img.src = image;
+      await img.decode(); // Wait for the image to load
+
+      // Preprocess the image.  IMPORTANT: Match your training preprocessing!
+      const tensor = tf.browser.fromPixels(img)
+        .resizeNearestNeighbor([224, 224]) // Resize. Replace with your model's input size!
+        .toFloat()
+        .expandDims();
+
+        const normalizedTensor = tensor.div(255.0);
+
+      // Make predictions
+      const predictionsTensor = await model.predict(normalizedTensor);
+      const predictionsArray = await predictionsTensor.data();
+
+      // Process predictions (example: find the top class)
+      let maxIndex = 0;
+        for (let i = 1; i < predictionsArray.length; i++) {
+            if (predictionsArray[i] > predictionsArray[maxIndex]) {
+                maxIndex = i;
+            }
+        }
+        // Assuming you have class names somewhere (e.g., from training)
+        const classNames = [
+          "Abyssinian",
+          "American Curl",
+          "American Shorthair",
+          "Balinese",
+          "Bengal",
+          "Birman",
+          "Bombay",
+          "British Shorthair",
+          "Burmese",
+          "Cornish Rex",
+          "Devon Rex",
+          "Egyptian Mau",
+          "Exotic Shorthair",
+          "Havana",
+          "Himalayan",
+          "Japanese Bobtail",
+          "Korat",
+          "Maine Coon",
+          "Manx",
+          "Nebelung",
+          "Norwegian Forest Cat",
+          "Oriental Short Hair",
+          "Persian",
+          "Ragdoll",
+          "Russian Blue",
+          "Scottish Fold",
+          "Selkirk Rex",
+          "Siamese",
+          "Siberian",
+          "Snowshoe",
+          "Sphynx",
+          "Tonkinese",
+          "Turkish Angora"
+      ];
+        const predictedClass = classNames[maxIndex];
+        const probability = predictionsArray[maxIndex];
+        let inferenceString;
+        const percentage = (probability * 100).toFixed(0);
+        if (probability > 0.80) {
+          inferenceString = `This cat is most likely a ${predictedClass}.`;
+      } else if (probability > 0.50) {
+          inferenceString = `This cat could be a ${predictedClass} with a ${percentage}% chance.`;
+      }
+        else{
+          inferenceString = `Not very confident about the breed of this cat.`;
+      }
+      console.log(percentage, " ", predictedClass)
+      setFinalInference(inferenceString)
+
+        //Clean up!
+        tensor.dispose();
+        normalizedTensor.dispose();
+        predictionsTensor.dispose();
+
+
+
+    } catch (err) {
+      console.error("Error classifying image:", err);
+      setError("Failed to classify image."); // Set error state
     }
   };
 
@@ -56,8 +142,8 @@ export default function Home() {
       reader.onloadend = async () => {
         const base64Image = reader.result;
 
-        if (!base64Image) { 
-          return; 
+        if (!base64Image) {
+          return;
         }
 
         setImgBase64(base64Image);
@@ -160,6 +246,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Cat Breed Classifier</h1>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {model && (<input type="file" accept="image/*" onChange={handleImageChange} disabled={isLoading || !model} className={styles.input} />)}
 
