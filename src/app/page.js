@@ -271,7 +271,7 @@ export default function Home() {
             alt="UploadedImage"
             className={styles.image}
           />
-          <p className={styles.predictions}>Predictions: {finalInference}</p>
+          <p className={styles.predictions}>{finalInference}</p>
         </div>
       )}
       {!loggingOut && (<Button
