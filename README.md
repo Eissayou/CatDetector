@@ -15,7 +15,45 @@ Besides identifying cats, CatDetector also uses MongoDB Atlas to store user logi
 ## About the Model
 
 The model doing all the cat-identifying is based on MobileNetV2, which is a model known for being lightweight and fast, making it perfect for running in a browser. I took the pre-trained MobileNetV2 model and fine-tuned it specifically for recognizing cat breeds.
-Currently, the model is trained on a dataset available here: [https://github.com/Aml-Hassan-Abd-El-hamid/datasets](https://github.com/Aml-Hassan-Abd-El-hamid/datasets).  While it does a good job now, it can definitely benefit from more training on a larger and more diverse dataset. I'm planning to create a more comprehensive dataset in the future to further improve the model's accuracy and ability to recognize a wider range of cat breeds.
+
+Currently, the model is trained to recognize the following 33 breeds:
+
+*   Abyssinian
+*   American Curl
+*   American Shorthair
+*   Balinese
+*   Bengal
+*   Birman
+*   Bombay
+*   British Shorthair
+*   Burmese
+*   Cornish Rex
+*   Devon Rex
+*   Egyptian Mau
+*   Exotic Shorthair
+*   Havana
+*   Himalayan
+*   Japanese Bobtail
+*   Korat
+*   Maine Coon
+*   Manx
+*   Nebelung
+*   Norwegian Forest Cat
+*   Oriental Short Hair
+*   Persian
+*   Ragdoll
+*   Russian Blue
+*   Scottish Fold
+*   Selkirk Rex
+*   Siamese
+*   Siberian
+*   Snowshoe
+*   Sphynx
+*   Tonkinese
+*   Turkish Angora
+
+The model was trained on a dataset available here: [https://github.com/Aml-Hassan-Abd-El-hamid/datasets](https://github.com/Aml-Hassan-Abd-El-hamid/datasets).  While it does a good job now, it can definitely benefit from more training on a larger and more diverse dataset. I'm planning to create a more comprehensive dataset in the future to further improve the model's accuracy and ability to recognize a wider range of cat breeds.
+
 
 ## Before running the app
 
