@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from '../page.module.css';
-import { Stack, Spinner, Center, useColorModeValue, Button } from '@chakra-ui/react';
+import { Stack, Spinner, Center, Button } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 
 export default function pastImages() {
@@ -66,7 +66,7 @@ export default function pastImages() {
     if (isLoading) {
         return (
             <Center h="100vh">
-                <Stack align="center"> {/* Use a Stack component */}
+                <Stack align="center" aria-live="polite"> {/* Use a Stack component */}
                     <Spinner
                         thickness='4px'
                         speed='0.65s'
@@ -83,7 +83,7 @@ export default function pastImages() {
         return (
             <div className={styles.page}>
                 <main className={styles.main}>
-                    <div className={styles.errorContainer}> {/* Add error container class */}
+                    <div className={styles.errorContainer} aria-live="polite"> {/* Add error container class */}
                         <h2>Error: {error}</h2>
                     </div>
                 </main>
@@ -92,28 +92,79 @@ export default function pastImages() {
     }
 
     return (
-        <div className={styles.page}>
+        <div className={styles.page} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
             <main className={styles.main}>
-                <Center><h1>My Images</h1></Center>
-
-                <ul className={styles.grid}> {/* Use grid class for image layout */}
+                <div style={{ width: '100%', maxWidth: 900, margin: '0 auto', marginBottom: 32 }}>
+                  <div style={{
+                    background: 'var(--card-bg)',
+                    borderRadius: 18,
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+                    padding: '28px 0 18px 0',
+                    marginBottom: 24,
+                    border: '1.5px solid var(--card-border)',
+                    textAlign: 'center',
+                    fontSize: '2rem',
+                    fontWeight: 800,
+                    color: '#228B22',
+                    letterSpacing: '-1px',
+                    textShadow: '0 2px 8px rgba(34,139,34,0.08)',
+                  }}>
+                    Past Inferences
+                  </div>
+                  <ul style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                    gap: 32,
+                    padding: 0,
+                    margin: 0,
+                    listStyle: 'none',
+                  }}>
                     {images.map((image) => (
-                        <li key={image.user} className={styles.card}>  {/* Use card class for image container */}
-                            <div className={styles.imageContainer}>
-                                <img src={image.base64} alt="Uploaded" className={styles.image} />
-                                <p className={styles.guessText}>Guess: {image.guess}</p> {/* Move guessText inside imageContainer */}
-                            </div>
-                        </li>
+                      <li key={image._id || image.user + (image.timestamp || '')} style={{
+                        background: 'var(--card-bg)',
+                        borderRadius: 18,
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+                        border: '1.5px solid var(--card-border)',
+                        padding: 18,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 12,
+                        minHeight: 380,
+                        margin: 0,
+                        width: '100%',
+                        maxWidth: 420,
+                        transition: 'box-shadow 0.2s, border-color 0.2s',
+                      }}>
+                        <div className={styles.imageContainer} style={{ boxShadow: 'none', border: 'none', background: 'transparent', padding: 0, marginBottom: 0 }}>
+                          <img src={image.base64} alt="Uploaded" className={styles.image} />
+                        </div>
+                        <div style={{
+                          marginTop: 8,
+                          fontWeight: 600,
+                          fontSize: '1.1rem',
+                          color: 'var(--foreground)',
+                          background: 'rgba(34,139,34,0.07)',
+                          borderRadius: 8,
+                          padding: '6px 18px',
+                          letterSpacing: '0.01em',
+                          boxShadow: '0 1px 4px rgba(34,139,34,0.04)',
+                          maxWidth: '90%',
+                          marginLeft: 'auto',
+                          marginRight: 'auto',
+                        }}>
+                          {image.guess}
+                        </div>
+                      </li>
                     ))}
-                </ul>
+                  </ul>
+                </div>
                 <Center>
                     {!loggingOut && (
                         <Button
                             onClick={handleLogout}
-                            colorScheme="red"
-                            variant="outline"
-                            size="sm"
-                            mt={4} // Add some top margin
+                            className={styles.logoutButton}
+                            variant="unstyled"
                         >
                             Logout
                         </Button>

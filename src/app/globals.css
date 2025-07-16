@@ -1,12 +1,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #f8f8f8;
+  --card-border: #ddd;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --card-bg: #181818;
+    --card-border: #333;
   }
 }
 

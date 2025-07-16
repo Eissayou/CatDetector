@@ -29,41 +29,43 @@ export default async function RootLayout({ children }) {
 
   return (
     <html suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <header className={styles.header}>
-          <div className={styles.container}>
-            <a href="/" className={styles.logo}>
-              <span className={styles.logoIcon}>🐈</span>
-              <span className={styles.logoText}>Cat Classifier</span>
-            </a>
-            <nav className={styles.nav}>
-              <ul className={styles.navList}>
-                <li className={styles.navItem}>
-                  {token && (
-                  <a href="/" className={styles.navLink}>
-                    Classify
-                  </a>
+      <body className={`${geistSans.variable} ${geistMono.variable}`} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+        <Provider>
+          <header className={styles.header}>
+            <div className={styles.container}>
+              <a href="/" className={styles.logo}>
+                <span className={styles.logoIcon}>🐈</span>
+                <span className={styles.logoText}>Cat Classifier</span>
+              </a>
+              <nav className={styles.nav}>
+                <ul className={styles.navList}>
+                  <li className={styles.navItem}>
+                    {token && (
+                    <a href="/" className={styles.navLink}>
+                      Classify
+                    </a>
+                    )}
+                  </li>
+                  <li className={styles.navItem}>
+                    {token && (
+                    <a href="/pastImages" className={styles.navLink}>
+                      Past Inferences
+                    </a>
+                    )}
+                  </li>
+                  <li className={styles.navItem}>
+                  {!token && (
+                    <a href="/login" className={styles.navLink}>
+                      Register/Login
+                    </a>
                   )}
-                </li>
-                <li className={styles.navItem}>
-                  {token && (
-                  <a href="/pastImages" className={styles.navLink}>
-                    Past Inferences
-                  </a>
-                  )}
-                </li>
-                <li className={styles.navItem}>
-                {!token && (
-                  <a href="/login" className={styles.navLink}>
-                    Register/Login
-                  </a>
-                )}
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </header>
-        <Provider>{children}</Provider>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </header>
+          {children}
+        </Provider>
       </body>
     </html>
   );

@@ -1,6 +1,9 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
+// To normalize images before saving, install the 'canvas' package:
+// npm install canvas
+import { createCanvas, loadImage } from 'canvas';
 
 const uri = process.env.MONGODB_URI; // Get from environment variable
 
@@ -55,9 +58,29 @@ export async function POST(req) {
             );
         }
 
+        // Normalize the base64 image to 320x320, center-cropped
+        let normalizedBase64 = base64Image;
+        try {
+          if (base64Image && base64Image.startsWith('data:image')) {
+            const img = await loadImage(base64Image);
+            const size = 320;
+            const canvas = createCanvas(size, size);
+            const ctx = canvas.getContext('2d');
+            // Calculate crop for center-crop
+            const minDim = Math.min(img.width, img.height);
+            const sx = (img.width - minDim) / 2;
+            const sy = (img.height - minDim) / 2;
+            ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+            normalizedBase64 = canvas.toDataURL();
+          }
+        } catch (e) {
+          console.error('Image normalization failed:', e);
+          // fallback: use original
+        }
+
         const doc = {
             user: username,
-            base64: base64Image,
+            base64: normalizedBase64,
             guess: imageGuess,
             timestamp: new Date(),
         };

@@ -143,15 +143,21 @@ export default function Home() {
         const base64Image = reader.result;
 
         if (!base64Image) {
+          setIsLoading(false);
+          event.target.value = null;
           return;
         }
 
         setImgBase64(base64Image);
         await classifyImage(base64Image);
         setIsLoading(false);
+        event.target.value = null;
       };
 
       reader.readAsDataURL(file);
+    } else {
+      setIsLoading(false);
+      event.target.value = null;
     }
   }
 
@@ -244,7 +250,7 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
       <h1 className={styles.title}>Cat Breed Classifier</h1>
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
@@ -265,7 +271,7 @@ export default function Home() {
       )}
 
       {imgBase64 && !isLoading && (
-        <div className={styles.imageContainer}>
+        <div className={styles.imageContainer} style={{ background: 'var(--card-bg)', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <img
             src={imgBase64}
             alt="UploadedImage"
@@ -276,10 +282,8 @@ export default function Home() {
       )}
       {!loggingOut && (<Button
         onClick={handleLogout}
-        colorScheme="red"
-        variant="outline"
-        size="sm"
-        mt={4} // Add some top margin
+        className={styles.logoutButton}
+        variant="unstyled"
       >
         Logout
       </Button>

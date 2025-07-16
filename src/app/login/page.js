@@ -13,6 +13,7 @@ export default function Login() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [passwordError, setPasswordError] = useState("");
 
     const userRegister = async () => {
         setIsLoggingInOrRegistering("isRegistering");
@@ -30,10 +31,24 @@ export default function Login() {
         setIsLoggedIn(true);
     }
 
+    const validatePassword = (pwd) => {
+      // At least 8 chars, one uppercase, one lowercase, one number, one special char
+      return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(pwd);
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+        setError(null);
+        setPasswordError("");
         setIsLoading(true);
+        if (isLoggingInOrRegistering === "isRegistering") {
+          if (!validatePassword(password)) {
+            setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, number, and special character.");
+            setIsLoading(false);
+            return;
+          }
+        }
+        
         if (isLoggingInOrRegistering === "isLoggedIn") {
             setIsLoading(false);
             router.push('/');
@@ -67,90 +82,80 @@ export default function Login() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                setError(errorData.error);
+                setError("An unexpected error occurred");
                 setIsLoading(false);
             }
         }
     }
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}> 
-        <Stack 
-          as="form"
-          onSubmit={handleSubmit}
-          spacing={4}
-          w="full"
-          maxW="md" 
-          bg="white"
-          rounded="lg"
-          p={6}
-          boxShadow="lg"
-          display="flex" 
-          flexDirection="column" 
-          alignItems="center" 
-        >
-            <Heading as="h2" size="lg" textAlign="center">
-                {isLoggingInOrRegistering === 'isLoggingIn' ? 'Login' :isLoggingInOrRegistering === 'isRegistering' ? 'Register': 'Logging in'}
-            </Heading>
-
-            {isLoggingInOrRegistering !== "isLoggedIn" && (
-                <>
-                    <div>
-                        <label htmlFor="username">Username:</label>
-                        <Input
-                            type="text"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="password">Password:</label>
-                        <Input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    <Button type="submit" colorScheme="blue" size="xl" isLoading={isLoading} loadingText="Submitting">
-                        {isLoggingInOrRegistering === 'isLoggingIn' ? 'Login' : 'Register'}
-                    </Button>
-                </>
-            )}
-
-            {isLoggingInOrRegistering === "isLoggedIn" && (
-
-                <div className={styles.progressContainer}>
-                    <Spinner size="xl" />
-                    <p>You have logged in! Redirecting now...</p>
-                </div>
-            )}
-
-            {isLoggingInOrRegistering !== "isLoggedIn" && (
-                <Text textAlign="center">
-                    {isLoggingInOrRegistering === 'isLoggingIn'
-                        ? "Don't have an account?"
-                        : 'Already have an account?'
-                    }
-                    <Button
-                        variant="link"
-                        colorScheme="blue"
-                        onClick={isLoggingInOrRegistering === 'isLoggingIn' ? userRegister : userLogin}
-                        ml={2}
-                        isLoading={isLoading}
-                    >
-                        {isLoggingInOrRegistering === 'isLoggingIn' ? 'Register' : 'Login'}
-                    </Button>
-                </Text>
-            )}
-        {error && (
-          <Text color="red.500" textAlign="center">
-            {error}
-          </Text>
-        )}
-        </Stack>
-
-        </div>
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--background)', color: 'var(--foreground)' }}>
+        <form className={styles.loginCard} onSubmit={handleSubmit} autoComplete="on">
+          <div className={styles.loginTitle}>
+            {isLoggingInOrRegistering === 'isLoggingIn' ? 'Login' : isLoggingInOrRegistering === 'isRegistering' ? 'Register' : 'Logging in'}
+          </div>
+          {isLoggingInOrRegistering !== "isLoggedIn" && (
+            <>
+              <input
+                type="text"
+                id="username"
+                className={styles.loginInput}
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+              />
+              <input
+                type="password"
+                id="password"
+                className={styles.loginInput}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+              {isLoggingInOrRegistering === "isRegistering" && passwordError && (
+                <div style={{ color: '#e53e3e', fontSize: '0.98rem', marginBottom: 8 }}>{passwordError}</div>
+              )}
+              <button
+                type="submit"
+                className={styles.loginButton}
+                disabled={isLoading}
+              >
+                {isLoading ? (isLoggingInOrRegistering === 'isRegistering' ? 'Registering...' : 'Logging in...') : (isLoggingInOrRegistering === 'isLoggingIn' ? 'Login' : 'Register')}
+              </button>
+            </>
+          )}
+          {isLoggingInOrRegistering === "isLoggedIn" && (
+            <div className={styles.progressContainer} aria-live="polite">
+              <Spinner size="xl" />
+              <p>You have logged in! Redirecting now...</p>
+            </div>
+          )}
+          {isLoggingInOrRegistering !== "isLoggedIn" && (
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              {isLoggingInOrRegistering === 'isLoggingIn'
+                ? "Don't have an account?"
+                : 'Already have an account?'}
+              <button
+                type="button"
+                className={styles.loginButton}
+                style={{ marginLeft: 12, padding: '6px 18px', fontSize: '1rem', borderWidth: 1 }}
+                onClick={isLoggingInOrRegistering === 'isLoggingIn' ? userRegister : userLogin}
+                disabled={isLoading}
+              >
+                {isLoggingInOrRegistering === 'isLoggingIn' ? 'Register' : 'Login'}
+              </button>
+            </div>
+          )}
+          {error && (
+            <div style={{ color: '#e53e3e', textAlign: 'center', marginTop: 8 }} aria-live="polite">
+              {error}
+            </div>
+          )}
+        </form>
+      </div>
     );
 }

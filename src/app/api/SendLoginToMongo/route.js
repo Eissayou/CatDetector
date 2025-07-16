@@ -44,6 +44,11 @@ export async function POST(req) {
     const collection = database.collection(collectionName);
 
     if (isLoggingInOrRegistering === 'isRegistering') {
+      // Password validation: at least 8 chars, one uppercase, one lowercase, one number, one special char
+      const passwordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(password);
+      if (!passwordValid) {
+        return NextResponse.json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character.' }, { status: 400 });
+      }
       const existingUser = await collection.findOne({ user: username });
       if (existingUser) {
         return NextResponse.json({ error: 'Username already exists' }, { status: 409 });

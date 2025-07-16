@@ -1,4 +1,4 @@
-# CatDetector
+ç# CatDetector
 
 Identify different cat breeds right in your browser! CatDetector uses TensorFlow.js to run the identification model directly on your device, making it fast and efficient.
 You can currently see this project live at [https://www.catclassifier.live](https://www.catclassifier.live).

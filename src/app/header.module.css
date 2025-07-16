@@ -1,63 +1,118 @@
 .header {
-    background-color: #f8f8f8; /* Light gray background */
-    border-bottom: 1px solid #eaeaea; /* Subtle border */
-    padding: 1rem 0;
-    position: sticky; /* Make the header sticky */
+    background-color: var(--card-bg);
+    border-bottom: 1.5px solid var(--card-border);
+    padding: 1.5rem 0 1.5rem 0;
+    position: sticky;
     top: 0;
-    z-index: 100; /* Ensure it stays on top */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  }
-  
-  .container {
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border-radius: 0 0 18px 18px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-radius 0.2s;
+    margin-bottom: 32px;
+}
+
+.container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 960px; /* Limit container width */
-    margin: 0 auto; /* Center the container */
+    max-width: 960px;
+    margin: 0 auto;
     padding: 0 1rem;
-  }
-  
-  .logo {
+}
+
+.logo {
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: #228B22; /* Example: Forest green */
-    font-weight: bold;
-    font-size: 1.5rem;
-  }
-  
-  .logoIcon {
-    margin-right: 0.5rem;
+    color: #228B22;
+    font-weight: 900;
     font-size: 2rem;
-  }
-  
-  .logoText {
+    letter-spacing: -1px;
+    text-shadow: 0 2px 8px rgba(34,139,34,0.08);
+    transition: color 0.2s, text-shadow 0.2s, transform 0.15s;
+    border-radius: 12px;
+    padding: 0.25rem 1rem;
+}
+.logo:hover, .logo:focus {
+    color: #145214;
+    background: rgba(34,139,34,0.07);
+    text-shadow: 0 4px 16px rgba(34,139,34,0.12);
+    transform: scale(1.04);
+}
+
+.logoIcon {
+    margin-right: 0.5rem;
+    font-size: 2.2rem;
+}
+
+.logoText {
     font-family: var(--font-geist-sans);
-  }
-  
-  .nav {
+    font-weight: 900;
+    font-size: 2rem;
+}
+
+.nav {
     /* No styles needed by default, as we're using a ul */
-  }
-  
-  .navList {
+}
+
+.navList {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
-  }
-  
-  .navItem {
+    align-items: center;
+}
+
+.navItem {
     margin-left: 1.5rem;
-  }
-  
-  .navLink {
+    display: flex;
+    align-items: center;
+}
+
+.navLink {
     text-decoration: none;
-    color: #666;
-    font-weight: 500;
-    transition: color 0.2s ease; /* Smooth color transition on hover */
+    color: #228B22;
+    font-weight: 700;
     font-family: var(--font-geist-sans);
+    padding: 10px 28px;
+    border-radius: 32px;
+    border: 2px solid #228B22;
+    background: transparent;
+    font-size: 1.08rem;
+    letter-spacing: 0.01em;
+    margin: 0 2px;
+    box-shadow: 0 2px 8px rgba(34,139,34,0.04);
+    transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+    outline: none;
+    cursor: pointer;
+}
+
+.navLink:hover, .navLink:focus {
+    background: rgba(34,139,34,0.08);
+    color: #145214;
+    border-color: #145214;
+    box-shadow: 0 4px 16px rgba(34,139,34,0.10);
+    text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .header {
+    background-color: var(--card-bg);
+    border-bottom: 1.5px solid var(--card-border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   }
-  
-  .navLink:hover {
-    color: #000;
+  .navLink {
+    border-color: #90ee90;
+    color: #90ee90;
+    background: transparent;
   }
+  .navLink:hover, .navLink:focus {
+    background: rgba(144,238,144,0.10);
+    color: #228B22;
+    border-color: #228B22;
+  }
+  .logo:hover, .logo:focus {
+    background: rgba(144,238,144,0.10);
+    color: #90ee90;
+  }
+}
