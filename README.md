@@ -93,5 +93,3 @@ Finally, open http://localhost:3000 in your browser to see it in action.
 
 ## Future Improvements
 * Add more cat breeds to the dataset / Train the model to be better.
-* Update the UI.
-* Fix a weird bug on some mobile devices where logging in doesnt work.
